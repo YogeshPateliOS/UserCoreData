@@ -18,10 +18,12 @@ class RegisterViewController: UIViewController {
     @IBOutlet weak var registerButton: UIButton!
     @IBOutlet weak var profileImageView: UIImageView!
 
+    private let manager =  DatabaseManager()
+
     // MARK: - Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        navigationItem.title = "Add User"
     }
 
 }
@@ -47,21 +49,22 @@ extension RegisterViewController{
             openAlert(message: "Please enter your password")
             return
         }
+        let user = UserModel(
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: password
+        )
+        manager.addUser(user)
+        navigationController?.popViewController(animated: true)
+       // showAlert()
+    }
 
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        let userEntity = UserEntity(context: context)
-        userEntity.firstName = firstName
-        userEntity.lastName = lastName
-        userEntity.email = email
-        userEntity.password = password
-
-        // Database mai reflect karne ke liye - IMP
-
-        do {
-            try context.save() // MIMP
-        }catch {
-            print("User saving error:", error)
-        }
+    func showAlert() {
+        let alertController = UIAlertController(title: nil, message: "User added", preferredStyle: .alert)
+        let okay = UIAlertAction(title: "Okay", style: .default)
+        alertController.addAction(okay)
+        present(alertController, animated: true)
     }
 
 }
