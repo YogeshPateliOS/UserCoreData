@@ -20,7 +20,7 @@ class DatabaseManager {
         userEntity.lastName = user.lastName
         userEntity.email = user.email
         userEntity.password = user.password
-
+        userEntity.imageName = user.imageName
         // Database mai reflect karne ke liye - IMP
 
         do {
