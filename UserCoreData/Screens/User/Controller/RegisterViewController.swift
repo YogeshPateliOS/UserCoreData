@@ -23,6 +23,8 @@ class RegisterViewController: UIViewController {
     private let manager =  DatabaseManager()
     private var imageSelectedByUser: Bool = false
 
+    var user: UserEntity?
+
     // MARK: - Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,16 +39,35 @@ extension RegisterViewController{
     func configuration() {
         uiconfiguration()
         addGesture()
+        userDetaliConfiguration()
     }
 
     func uiconfiguration() {
-        navigationItem.title = "Add User"
         profileImageView.layer.cornerRadius = profileImageView.frame.size.height / 2
     }
 
     func addGesture() {
         let imageTap = UITapGestureRecognizer(target: self, action: #selector(RegisterViewController.openGallery))
         profileImageView.addGestureRecognizer(imageTap)
+    }
+
+    func userDetaliConfiguration() {
+        if let user {
+            registerButton.setTitle("Update", for: .normal)
+            navigationItem.title = "Update User"
+            firstNameField.text = user.firstName
+            lastNameField.text = user.lastName
+            emailField.text = user.email
+            passwordField.text = user.password
+
+            let imageURL = URL.documentsDirectory.appending(components: user.imageName ?? "").appendingPathExtension("png")
+            profileImageView.image = UIImage(contentsOfFile: imageURL.path)
+
+            imageSelectedByUser = true
+        }else {
+            navigationItem.title = "Add User"
+            registerButton.setTitle("Register", for: .normal)
+        }
     }
 
 
@@ -74,18 +95,44 @@ extension RegisterViewController{
             return
         }
 
-       // print("All validations are done!!! good to go...")
-        let imageName = UUID().uuidString
-        let user = UserModel(
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            password: password,
-            imageName: imageName
-        )
-        saveImageToDocumentDirectory(imageName: imageName)
-        manager.addUser(user)
+        if let user {
+            // newUser - Ashish
+            // user(user entity) - store user hai - Yogesh
+            // Yogesh = Ashish
+            // update
+
+            let newUser = UserModel(
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password,
+                imageName: user.imageName ?? ""
+            )
+
+            manager.updateUser(user: newUser, userEntity: user)
+            saveImageToDocumentDirectory(imageName: newUser.imageName)
+        }else {
+            // add
+
+            let imageName = UUID().uuidString
+            let newUser = UserModel(
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password,
+                imageName: imageName
+            )
+
+            saveImageToDocumentDirectory(imageName: imageName)
+            manager.addUser(newUser)
+        }
+
         navigationController?.popViewController(animated: true)
+
+
+       // print("All validations are done!!! good to go...")
+
+
        // showAlert()
     }
 
